@@ -16,7 +16,7 @@ export default {
   const path=new URL(req.url).pathname;
   if(req.method==='GET'&&path==='/health')return json({ok:true});
   if(req.method==='GET'&&path==='/config')return json({publicKey:env.VAPID_PUBLIC_KEY});
-  if(req.method!=='POST'||!['/subscribe','/status','/unsubscribe'].includes(path))return fail('Not found',404);
+  if(req.method!=='POST'||!['/subscribe','/status','/unsubscribe','/test'].includes(path))return fail('Not found',404);
   const tokenHash=await auth(req);if(!tokenHash)return fail('Unauthorized',401);
   let body;try{if(Number(req.headers.get('Content-Length')||0)>16384)return fail('Too large',413);body=await req.json()}catch{return fail('Invalid JSON')}
   if(path==='/subscribe'){
@@ -27,6 +27,19 @@ export default {
   }
   if(!isEndpoint(body.endpoint))return fail('Invalid endpoint');
   const row=await env.DB.prepare('SELECT token_hash FROM devices WHERE endpoint=?').bind(body.endpoint).first();if(!row||row.token_hash!==tokenHash)return fail('Not found',404);
+  if(path==='/test'){
+   if(!env.VAPID_SUBJECT||!env.VAPID_PUBLIC_KEY||!env.VAPID_PRIVATE_KEY)return fail('VAPID configuration incomplete',503);
+   try{
+    webpush.setVapidDetails(env.VAPID_SUBJECT,env.VAPID_PUBLIC_KEY,env.VAPID_PRIVATE_KEY);
+    const subscription=JSON.parse((await env.DB.prepare('SELECT subscription FROM devices WHERE endpoint=? AND token_hash=?').bind(body.endpoint,tokenHash).first()).subscription);
+    await webpush.sendNotification(subscription,JSON.stringify({title:'Riffinity · Push配信テスト',body:'CloudflareからiPhoneへ通知が届きました！',tag:'riffinity-push-test',kind:'test'}),{TTL:60});
+    return json({ok:true});
+   }catch(e){
+    if(e.statusCode===404||e.statusCode===410)return fail('Push subscription expired; please register again',410);
+    console.error('Push test failed',e.statusCode||e.message);
+    return fail('Push delivery failed'+(e.statusCode?' (HTTP '+e.statusCode+')':''),502);
+   }
+  }
   if(path==='/unsubscribe'){await env.DB.prepare('DELETE FROM devices WHERE endpoint=? AND token_hash=?').bind(body.endpoint,tokenHash).run();return json({ok:true})}
   if(!validSettings(body))return fail('Invalid settings');
   await env.DB.prepare('UPDATE devices SET hour=?,enabled=?,completed_day=?,freezes=?,streak=?,updated_at=CURRENT_TIMESTAMP WHERE endpoint=? AND token_hash=?').bind(body.hour,Number(body.enabled),body.completedDay??null,body.freezes,body.streak,body.endpoint,tokenHash).run();return json({ok:true});
