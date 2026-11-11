@@ -80,6 +80,54 @@ label{color:#aebed1}
 #tasks .phrase-grid button.active{background:#2a5276;border-color:#58adff;color:#d7efff}
 #history .calendar-grid button{border-radius:10px}
 @media(max-width:390px){.wrap{padding:16px 12px 115px}.card{padding:16px}.metro-main-actions #metroToggle{height:78px;width:78px}.metro-controls{gap:5px}.metro-controls button{font-size:.79rem}}
+
+/* Reference-inspired metronome layout */
+#session>.card{background:transparent;border:0;box-shadow:none;padding:0;margin:0}
+#session .metro-panel{background:transparent;border:0;margin:0;padding:0}
+#session .metro-top{display:flex;justify-content:center;align-items:center;gap:12px;letter-spacing:.24em;font-size:.78rem;color:#d5e0ef;margin:16px 0 10px}
+#session .metro-panel>.row:first-child{display:none}
+#session .beat-lights{margin:30px 0 35px;gap:14px}
+#session .beat-lights button{width:clamp(26px,8vw,37px);height:clamp(26px,8vw,37px);border-radius:50%;padding:0;border:2px solid #3d4b5d;background:#34404e;box-shadow:none;position:relative;flex-shrink:0}
+#session .beat-lights button.accent{background:#48a8ff;border-color:#69bbff}
+#session .beat-lights button.normal{background:#56677a;border-color:#56677a}
+#session .beat-lights button.mute{background:transparent;border-style:dashed;border-color:#65748a}
+#session .beat-lights button.lit{box-shadow:0 0 0 5px #4ca9ff25,0 0 19px #48a8ff77}
+#session .beat-lights button:focus-visible{outline:2px solid white;outline-offset:4px}
+#session .metro-bpm{font-size:clamp(5rem,23vw,8rem);font-weight:300;margin:4px 0 0}
+#session .metro-controls{grid-template-columns:repeat(2,1fr) 1.15fr repeat(2,1fr);margin:0 0 8px;align-items:center}
+#session .metro-controls input{background:transparent;border:0;font-size:.96rem;color:#8ca1ba}
+#session .metro-main-actions{margin:24px 0 18px}
+#session .metro-main-actions #metroToggle{height:96px;width:96px;font-size:2rem}
+#session .metro-slider{width:100%;accent-color:#51abff;height:24px;margin:5px 0 24px}
+#session .metro-quick{grid-template-columns:1fr 1fr;gap:12px}
+#session .metro-quick .tap-options{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+#session .metro-quick .tap-options button{flex:0 0 auto;min-width:58px}
+#session .metro-feature-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+#session .metro-feature{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid #344358;background:#1a2634;border-radius:17px;padding:13px 12px;color:#e0e9f5;text-align:left;min-height:69px}
+#session .metro-feature strong{display:block;font-size:.85rem}
+#session .metro-feature small{display:block;font-size:.7rem;color:#9eafc5;margin-top:4px}
+#session .metro-feature[aria-pressed=true]{border-color:#58adff;background:#19354e}
+#session .metro-feature .switch{width:34px;height:20px;border-radius:99px;background:#425064;flex-shrink:0;position:relative}
+#session .metro-feature .switch:before{content:'';position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
+#session .metro-feature[aria-pressed=true] .switch{background:#399eff}
+#session .metro-feature[aria-pressed=true] .switch:before{transform:translateX(14px)}
+#session .metro-advanced{margin:14px 0}
+#session .metro-context{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px;background:#192432;border:1px solid #304153;border-radius:18px;margin:15px 0}
+#session .metro-context strong{display:block;margin-top:5px;font-size:1.08rem}
+#session .metro-context>div+div{border-left:1px solid #394a60;padding-left:12px}
+#session .metro-advanced-body .metro-settings{grid-template-columns:1fr}
+#session .metro-advanced-body .tap-options{flex-wrap:wrap}
+#session .metro-advanced-body .tap-options button{flex:1 1 35%}
+#session .metro-advanced-body .metro-custom{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#session .metro-advanced-body .metro-custom input{width:100%}
+#session .metro-help{font-size:.72rem;text-align:center;color:#96a7bd;margin:0 0 10px}
+#session .metro-poly{padding:12px;border:1px solid #304153;border-radius:14px;background:#111d29}
+#session .metro-poly .row{gap:8px}
+#session .metro-poly select{max-width:130px}
+#session .metro-main-actions button{font-size:.9rem}
+#session .metro-main-actions #metroToggle{font-size:1.9rem}
+#session .metro-divider{border:0;border-top:1px solid #2a384a;margin:19px 0}
+@media(max-width:390px){#session .metro-feature{padding:10px 8px}#session .metro-main-actions #metroToggle{height:82px;width:82px}}
 </style>
 </head>
 <body><div class="wrap"><header><div><h1>Riffinity<span style="color:#58adff">.</span></h1><div class="muted">今日も、少しずつ。</div></div><div id="headerStreak">🔥 0日</div></header>
@@ -88,7 +136,10 @@ label{color:#aebed1}
 <div class="metro-panel" id="metroPanel">
  <div class="row"><h3>🎵 メトロノーム</h3><span class="chip" id="metroStatus">停止中</span></div>
 
- <div class="beat-lights" id="beatLights" aria-label="拍の表示"></div>
+
+ <div class="metro-top">♩ METRONOME</div>
+ <div class="beat-lights" id="beatLights" aria-label="拍のアクセント編集"></div>
+ <p class="metro-help">上の円をタップ：強拍 → 通常 → 無音</p>
  <div class="metro-bpm"><span id="metroBpmValue">80</span><span class="small">BPM</span></div>
  <div class="metro-controls">
   <button class="secondary" onclick="changeMetroBpm(-5)" aria-label="BPMを5下げる">−5</button>
@@ -98,22 +149,34 @@ label{color:#aebed1}
   <button class="secondary" onclick="changeMetroBpm(5)" aria-label="BPMを5上げる">+5</button>
  </div>
  <div class="metro-main-actions">
-  <button class="secondary" onclick="setMetroBpm(80)" aria-label="80 BPMに戻す">↺</button>
+  <button class="secondary" onclick="resetMetroTempo()" aria-label="この練習の開始BPMに戻す">↺</button>
   <button id="metroToggle" onclick="toggleMetro()" aria-label="メトロノーム再生切替">▶</button>
   <button class="secondary" onclick="tapTempo()">TAP</button>
  </div>
+ <input id="metroSlider" class="metro-slider" type="range" min="30" max="300" value="80" aria-label="テンポをスライダーで調整" oninput="setMetroBpm(this.value)">
  <div class="metro-quick">
-  <div><label for="metroMeter">拍子</label><select id="metroMeter" onchange="metroSettingChanged()"><option value="4">4/4</option><option value="3">3/4</option><option value="2">2/4</option><option value="5">5/4</option><option value="6">6/4</option></select></div>
-  <div><label for="metroSub">分割</label><select id="metroSub" onchange="metroSettingChanged()"><option value="1">4分音符</option><option value="2">8分音符</option><option value="3">3連符</option><option value="4">16分音符</option></select></div>
+  <div><label for="metroMeter">拍子</label><select id="metroMeter" onchange="metroSettingChanged()"><option value="4">4/4</option><option value="3">3/4</option><option value="2">2/4</option><option value="5">5/4</option><option value="6">6/4</option><option value="7">7/4</option></select></div>
+  <div><label for="metroSub">分割</label><select id="metroSub" onchange="metroSettingChanged()"><option value="1">♩ 4分</option><option value="2">♫ 8分</option><option value="3">♪ 3連</option><option value="4">♬ 16分</option></select></div>
  </div>
- <details class="metro-advanced"><summary>詳細設定 · 自動上昇 / ギャップ / アクセント</summary><div class="metro-advanced-body">
+ <div class="metro-feature-row">
+  <button type="button" id="metroRampSwitch" class="metro-feature" aria-pressed="false" onclick="toggleMetroFeature('ramp')"><span><strong>↗ 自動上昇</strong><small id="metroRampLabel">BPMを段階的に上げる</small></span><span class="switch"></span></button>
+  <button type="button" id="metroPyramidSwitch" class="metro-feature" aria-pressed="false" onclick="toggleMetroFeature('pyramid')"><span><strong>⌃ ピラミッド</strong><small>上げて下げる</small></span><span class="switch"></span></button>
+ </div>
+ <details class="metro-advanced" id="metroAdvanced"><summary>詳細設定　·　拍子 / ギャップ / ポリリズム</summary><div class="metro-advanced-body">
+  <h3>カスタム拍子</h3><div class="metro-custom">
+   <div><label for="metroCustomNum">分子</label><input type="number" id="metroCustomNum" min="1" max="32" value="15"></div>
+   <div><label for="metroCustomDen">分母</label><select id="metroCustomDen"><option>2</option><option selected>4</option><option>8</option><option>16</option><option>32</option></select></div>
+  </div>
+  <button class="secondary full" onclick="applyCustomMeter()">カスタム拍子を適用</button>
+  <p class="note">例：15/32。BPMは分母の音価を基準にします。拍数が多い場合、円は複数行に折り返します。</p>
   <div class="metro-settings">
    <div><label for="metroGap">小節単位のギャップ</label><select id="metroGap" onchange="metroSettingChanged()"><option value="0">オフ</option><option value="1">1小節鳴る / 1小節無音</option><option value="2">2小節鳴る / 2小節無音</option><option value="4">4小節鳴る / 4小節無音</option></select></div>
    <div><label for="metroRamp">BPM自動上昇</label><select id="metroRamp" onchange="metroSettingChanged()"><option value="0">オフ</option><option value="1">1分ごと +5</option><option value="2">2分ごと +5</option><option value="3">3分ごと +5</option></select></div>
   </div>
-  <label><input type="checkbox" id="metroAccent" checked onchange="metroSettingChanged()" style="width:auto"> 小節頭を強調</label>
-  <p class="note">拍ごとのタップ編集・自由拍子・ポリリズムは次のアップデートで対応します。</p>
+  <label><input type="checkbox" id="metroAccent" checked onchange="metroSettingChanged()" style="width:auto"> 先頭拍を強調（拍ごとの設定がない場合）</label>
+  <div class="metro-poly"><div class="row"><div><strong>ポリリズム</strong><div class="note">例：3 : 4</div></div><button class="secondary" type="button" onclick="togglePolyInfo()">設定を見る</button></div><div id="metroPolyInfo" class="note hidden">異なる拍の同時再生は次の音声エンジン更新で対応します。現在は設定のプレビューのみです。</div></div>
  </div></details>
+ <div class="metro-context"><div><span class="muted small">目標BPM</span><strong id="metroTargetBpm">—</strong></div><div><span class="muted small">前回の記録</span><strong id="metroLastBpm">—</strong></div></div>
  <p class="note">練習開始時に自動再生。iPhoneで無音の場合は消音モードを解除し、音量を上げて「クリック開始」をタップしてください。画面ロック中は停止する場合があります。</p><p class="note" id="metroAudioDiagnostic" role="status">音声エンジン: 未起動</p>
 </div><div class="timer" id="clock">03:00</div><div id="overtimeHint" class="muted" style="text-align:center" role="status">3分経過後も練習とメトロノームは継続できます。</div><div class="grid2"><button id="pauseBtn" class="secondary" onclick="togglePause()">一時停止</button><button class="ghost" onclick="finishSession(false)">終了する</button></div><p class="note">3分は達成ラインです。経過後もメトロノームと練習時間の計測は続きます。「終了する」を押すと実際の練習時間を記録できます。画面を閉じても経過時間を復元します（停止中は加算しません）。</p></div></section>
 <section id="review" class="hidden"><div class="card"><h2 id="reviewTitle">練習結果</h2><p id="reviewInfo" class="muted"></p><label>BPM（任意）</label><input type="number" id="reviewBpm" min="20" max="350" step="1"><label for="reviewRating">演奏の自信度</label><select id="reviewRating"><option value="5">5 · 非常に自信がある</option><option value="4">4 · おおむね安定</option><option value="3" selected>3 · 不安が残る</option><option value="2">2 · ミスが目立つ</option><option value="1">1 · ほとんどできなかった</option></select><label for="reviewTarget">目標BPM（初回設定後も変更可）</label><input id="reviewTarget" type="number" min="20" max="350" placeholder="任意"><label for="reviewMemo">練習メモ</label><input id="reviewMemo" maxlength="160" placeholder="任意"><button class="full" onclick="saveSession()">記録を保存する</button></div></section>
@@ -150,7 +213,7 @@ function togglePause(){const a=db.active;if(!a)return;if(a.running){a.accumulate
 function renderClock(){if(!db.active)return;const t=db.tasks.find(x=>x.id===db.active.taskId);$('sessionName').textContent=t?.name||'練習';$('sessionDetails').textContent=t?.details||'';$('sessionInstrument').textContent=db.active.instrument==='drums'?'ドラム':'ギター';const elapsed=activeSeconds();const left=Math.max(0,180-elapsed);const over=Math.max(0,elapsed-180);const shown=elapsed>=180?over:left;$('clock').textContent=(elapsed>=180?'+':'')+String(Math.floor(shown/60)).padStart(2,'0')+':'+String(shown%60).padStart(2,'0');$('overtimeHint').textContent=elapsed>=180?'✓ 3分達成！ 練習時間を追加計測中（メトロノームも継続）':'3分経過後も練習とメトロノームは継続できます。';$('pauseBtn').textContent=db.active.running?'一時停止':'再開';$('clock').classList.toggle('success',elapsed>=180)}
 function finishSession(force){if(!db.active)return;const sec=activeSeconds();if(sec<180&&!force&&!confirm(`練習は${sec}秒です。3分未満のためストリークは達成しません。終了しますか？`))return;db.active.accumulated=sec;db.active.running=false;stopMetro();save();pending={...db.active,seconds:sec};$('reviewTitle').textContent=sec>=180?'🎉 3分ミッション達成！':'練習を記録';$('reviewInfo').textContent=`練習時間：${Math.floor(sec/60)}分${sec%60}秒`;const t=db.tasks.find(x=>x.id===pending.taskId);const last=db.sessions.filter(x=>x.taskId===pending.taskId).slice(-1)[0];$('reviewBpm').value=last?.bpm??t?.bpm??'';$('reviewRating').value='3';$('reviewTarget').value=t?.targetBpm??'';$('reviewMemo').value='';show('review')}
 function saveSession(){if(!pending)return;const bpm=$('reviewBpm').value;const num=bpm===''?null:Number(bpm);if(num!==null&&(!Number.isInteger(num)||num<20||num>350)){alert('BPMは20〜350の整数で入力してください');return}const target=$('reviewTarget').value===''?null:Number($('reviewTarget').value);if(target!==null&&(!Number.isInteger(target)||target<20||target>350)){alert('目標BPMは20〜350の整数で入力してください');return}const task=db.tasks.find(x=>x.id===pending.taskId);if(task)task.targetBpm=target;const c=Number($('reviewRating').value);const record={id:crypto.randomUUID(),day:pending.day,taskId:pending.taskId,instrument:pending.instrument,startedAt:pending.startedAt,seconds:pending.seconds,bpm:num,confidence:c,rating:c===5?'easy':c>=3?'stable':'hard',memo:$('reviewMemo').value.trim()};db.sessions.push(record);if(record.seconds>=180){db.days[record.day]='done';const actual=Object.values(db.days).filter(v=>v==='done').length;const rewards=Math.floor(actual/7);if(rewards>db.earnedAt){db.freezes=Math.min(3,db.freezes+(rewards-db.earnedAt));db.earnedAt=rewards}}db.active=null;pending=null;save();show('today');if(record.seconds>=180)toast('🎉 3分達成！今日も継続できました！')}
-function show(name){if(name==='today'||name==='history')reconcile();['today','session','review','tasks','history','settings'].forEach(x=>$(x).classList.toggle('hidden',x!==name));$('tabs').classList.toggle('hidden',name==='session'||name==='review');document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));if(name==='today')renderToday();if(name==='session'){renderClock();if(db.active){const task=db.tasks.find(t=>t.id===db.active.taskId);if(task&&!metro.playing)setMetroBpm(recommendBpm(task))}};if(name==='tasks'){renderTasks();renderBook()}if(name==='history'){renderHistory();renderCalendar();renderBpmRecords()}if(name==='settings')$('reminderHour').value=String(db.reminderHour??21)}
+function show(name){if(name==='today'||name==='history')reconcile();['today','session','review','tasks','history','settings'].forEach(x=>$(x).classList.toggle('hidden',x!==name));$('tabs').classList.toggle('hidden',name==='session'||name==='review');document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));if(name==='today')renderToday();if(name==='session'){renderClock();if(db.active){const task=db.tasks.find(t=>t.id===db.active.taskId);if(task){if(!metro.playing)setMetroBpm(recommendBpm(task));const last=db.sessions.filter(x=>x.taskId===task.id).slice(-1)[0];$('metroTargetBpm').textContent=task.targetBpm?task.targetBpm+' BPM':'未設定';$('metroLastBpm').textContent=last?.bpm?last.bpm+' BPM · 自信 '+(confidence(last)??'—')+'/5':'記録なし'}}};if(name==='tasks'){renderTasks();renderBook()}if(name==='history'){renderHistory();renderCalendar();renderBpmRecords()}if(name==='settings')$('reminderHour').value=String(db.reminderHour??21)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function renderTasks(){$('taskList').innerHTML=db.tasks.filter(t=>t.kind!=='book').map(t=>`<div class="item"><div class="row"><b>${esc(t.name)}</b><button class="ghost small" onclick="removeTask('${esc(t.id)}')">削除</button></div><div class="muted">${t.instrument==='drums'?'🥁 ドラム':'🎸 ギター'} · ${esc(t.details||'')} ${t.bpm?'· '+t.bpm+' BPM':''} · 優先度${t.priority}</div></div>`).join('')||'<p class="muted">課題はありません。</p>'}
 function addTask(){const name=$('newName').value.trim();if(!name){alert('課題名を入力してください');return}const bpm=$('newBpm').value?Number($('newBpm').value):null;if(bpm!==null&&(!Number.isInteger(bpm)||bpm<20||bpm>350)){alert('BPMは20〜350の整数で入力してください');return}db.tasks.push({id:crypto.randomUUID(),instrument:$('newInstrument').value,name,details:$('newDetails').value.trim(),bpm,priority:Number($('newPriority').value)});$('newName').value='';$('newDetails').value='';$('newBpm').value='';save();renderTasks()}
@@ -169,7 +232,7 @@ function initializeTapChoices(){
   for(const option of select.options){
    const btn=document.createElement('button');btn.type='button';btn.className='tap-choice';btn.dataset.value=option.value;
    btn.textContent=option.textContent;btn.setAttribute('aria-pressed','false');
-   btn.addEventListener('click',()=>{select.value=option.value;sync();select.dispatchEvent(new Event('change',{bubbles:true}))});
+   btn.addEventListener('click',()=>{select.value=option.value;if(id==='metroMeter'){metro.customMeter=false;metro.den=4;metro.pattern=[]}sync();select.dispatchEvent(new Event('change',{bubbles:true}))});
    group.appendChild(btn);
   }
   select.insertAdjacentElement('afterend',group);
@@ -211,24 +274,27 @@ function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'app
 async function importData(e){const f=e.target.files?.[0];if(!f)return;try{const d=JSON.parse(await f.text());if(d.version!==1||!Array.isArray(d.tasks)||!Array.isArray(d.sessions)||!d.days||typeof d.days!=='object'||!Number.isInteger(d.freezes))throw Error('形式が違います');if(!confirm('現在の記録をバックアップの内容で置き換えますか？'))return;db=d;save();show('today');alert('復元しました')}catch(err){alert('復元できませんでした：'+err.message)}finally{e.target.value=''}}
 
 /* Riffinity practice suite: Web Audio scheduled clicks, all settings are optional. */
-const metro={ctx:null,playing:false,interval:null,next:0,step:0,started:0,baseBpm:80,bpm:80,meter:4,sub:1,gap:0,ramp:0,accent:true,taps:[],starting:false};
+const metro={ctx:null,playing:false,interval:null,next:0,step:0,started:0,baseBpm:80,bpm:80,meter:4,den:4,sub:1,gap:0,ramp:0,accent:true,pattern:[],pyramid:false,pyramidTop:160,taps:[],starting:false};
 function metroSettingChanged(){
- metro.meter=Number($('metroMeter').value);metro.sub=Number($('metroSub').value);
+ const selectedMeter=Number($('metroMeter').value);if(!metro.customMeter)metro.meter=selectedMeter;metro.sub=Number($('metroSub').value);
  metro.gap=Number($('metroGap').value);metro.ramp=Number($('metroRamp').value);
- metro.accent=$('metroAccent').checked;
+ metro.accent=$('metroAccent').checked;syncFeatureButtons();
  if(metro.playing){stopMetro();startMetro()}
  drawBeat(-1);
 }
+function togglePolyInfo(){$('metroPolyInfo').classList.toggle('hidden')}
+function applyCustomMeter(){const n=Number($('metroCustomNum').value),den=Number($('metroCustomDen').value);if(!Number.isInteger(n)||n<1||n>32||![2,4,8,16,32].includes(den)){toast('拍子を確認してください');return}metro.meter=n;metro.den=den;metro.customMeter=true;metro.pattern=Array.from({length:n},(_,i)=>metro.pattern[i]??(i===0?'accent':'normal'));$('metroMeter').value=String(n);$('metroMeter').dispatchEvent(new Event('change'));if(metro.playing){stopMetro();startMetro()}drawBeat(-1);toast(n+'/'+den+' に設定しました')}
+function toggleBeat(i){const order=['accent','normal','mute'];const v=metro.pattern[i]??(i===0?'accent':'normal');metro.pattern[i]=order[(order.indexOf(v)+1)%3];drawBeat(-1)}
+function toggleMetroFeature(name){if(name==='pyramid'){metro.pyramid=!metro.pyramid;if(metro.pyramid&&metro.ramp===0){metro.ramp=1;$('metroRamp').value='1';$('metroRamp').dispatchEvent(new Event('change'))}}else{metro.ramp=metro.ramp?0:1;$('metroRamp').value=String(metro.ramp);$('metroRamp').dispatchEvent(new Event('change'))}syncFeatureButtons()}
+function syncFeatureButtons(){const r=$('metroRampSwitch'),p=$('metroPyramidSwitch');if(r)r.setAttribute('aria-pressed',String(metro.ramp>0));if(p)p.setAttribute('aria-pressed',String(metro.pyramid));if($('metroRampLabel'))$('metroRampLabel').textContent=metro.ramp?'+'+5+' BPM / '+metro.ramp+'分':'BPMを段階的に上げる'}
+function resetMetroTempo(){const task=db.tasks.find(t=>t.id===db.active?.taskId);setMetroBpm(task?recommendBpm(task):80)}
 function setMetroBpm(value){
  const n=Number(value);if(!Number.isFinite(n))return;
  metro.bpm=Math.max(30,Math.min(300,Math.round(n)));metro.baseBpm=metro.bpm;
- $('metroBpm').value=metro.bpm;$('metroBpmValue').textContent=metro.bpm;
+ $('metroBpm').value=metro.bpm;$('metroBpmValue').textContent=metro.bpm;if($('metroSlider'))$('metroSlider').value=metro.bpm;
 }
 function changeMetroBpm(delta){setMetroBpm(metro.bpm+delta)}
-function drawBeat(beat){
- const el=$('beatLights');if(!el)return;
- el.innerHTML=Array.from({length:metro.meter},(_,i)=>'<span class="'+(i===beat?'lit ':'')+(i===0?'first':'')+'"></span>').join('');
-}
+function drawBeat(beat){const el=$('beatLights');if(!el)return;el.innerHTML=Array.from({length:metro.meter},(_,i)=>{const mode=metro.pattern[i]??(i===0?'accent':'normal');return '<button type="button" class="'+mode+(i===beat?' lit':'')+'" aria-label="'+(i+1)+'拍目 '+(mode==='accent'?'強拍':mode==='mute'?'無音':'通常')+'" title="'+(i+1)+'拍目：'+mode+'" onclick="toggleBeat('+i+')"></button>'}).join('')}
 function metroClick(at,accent,subClick){
  const ctx=metro.ctx;if(!ctx)return;
  const osc=ctx.createOscillator(),gain=ctx.createGain();
@@ -246,7 +312,7 @@ function scheduleMetro(){
   const bar=Math.floor(metro.step/(metro.sub*metro.meter));
   const isSilent=metro.gap>0&&(Math.floor(bar/metro.gap)%2===1);
   const downbeat=metro.step%metro.sub===0;
-  if(!isSilent)metroClick(metro.next,metro.accent&&beat===0&&downbeat,!downbeat);
+  const mode=metro.pattern[beat]??(beat===0&&metro.accent?'accent':'normal');if(!isSilent&&(mode!=='mute'||!downbeat))metroClick(metro.next,mode==='accent'&&downbeat,!downbeat);
   if(downbeat&&metro.next>=now) {
    const when=Math.max(0,(metro.next-now)*1000);
    // Visual indicator is approximate; audio is scheduled independently.
@@ -254,9 +320,9 @@ function scheduleMetro(){
   }
   metro.step++;
   const minutes=metro.next-metro.started;
-  const rise=metro.ramp?Math.floor(Math.max(0,minutes)/(metro.ramp*60))*5:0;
+  const phase=metro.ramp?Math.floor(Math.max(0,minutes)/(metro.ramp*60)):0;const rise=metro.pyramid?Math.max(0,Math.min(phase,Math.max(0,Math.ceil((metro.pyramidTop-metro.baseBpm)/5))*2-phase))*5:phase*5;
   const effective=Math.min(300,metro.baseBpm+rise);
-  if(effective!==metro.bpm){metro.bpm=effective;$('metroBpmValue').textContent=effective;$('metroBpm').value=effective}
+  if(effective!==metro.bpm){metro.bpm=effective;$('metroBpmValue').textContent=effective;$('metroBpm').value=effective;if($('metroSlider'))$('metroSlider').value=effective}
   metro.next+=60/(effective*metro.sub);
  }
 }
