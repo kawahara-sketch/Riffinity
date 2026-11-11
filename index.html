@@ -203,10 +203,10 @@ label{color:#aebed1}
  </div></details>
  <div class="metro-essentials"><div><label for="metroTargetInput">目標 BPM</label><input id="metroTargetInput" type="number" inputmode="numeric" min="30" max="300" placeholder="—" onchange="saveMetroTarget(this.value)"></div><div><label for="metroVolume">音量 <span id="metroVolumeValue">70%</span></label><input id="metroVolume" type="range" min="0" max="100" step="5" value="70" oninput="setMetroVolume(this.value)" aria-label="メトロノーム音量"></div></div>
  <p class="note" id="metroAudioDiagnostic" role="status" aria-live="polite"></p>
-</div><div class="timer" id="clock">03:00</div><div id="overtimeHint" class="muted" style="text-align:center" role="status">3分経過後も練習とメトロノームは継続できます。</div><div class="grid2"><button id="pauseBtn" class="secondary" onclick="togglePause()">一時停止</button><button class="ghost" onclick="finishSession(false)">終了する</button></div><p class="note">3分は達成ラインです。経過後もメトロノームと練習時間の計測は続きます。「終了する」を押すと実際の練習時間を記録できます。画面を閉じても経過時間を復元します（停止中は加算しません）。</p></div></section>
+</div><div class="timer" id="clock">03:00</div><div id="overtimeHint" class="muted" style="text-align:center" role="status">3分経過後も練習とメトロノームは継続できます。</div><button class="secondary full" type="button" onclick="openProgressEditor()" style="margin-bottom:10px">BPM・自信度を更新</button><div class="grid2"><button id="pauseBtn" class="secondary" onclick="togglePause()">一時停止</button><button class="ghost" onclick="finishSession(false)">終了する</button></div><p class="note">3分は達成ラインです。経過後もメトロノームと練習時間の計測は続きます。「終了する」を押すと実際の練習時間を記録できます。画面を閉じても経過時間を復元します（停止中は加算しません）。</p></div></section>
 <section id="review" class="hidden"><div class="card"><h2 id="reviewTitle">練習結果</h2><p id="reviewInfo" class="muted"></p><label>BPM（任意）</label><input type="number" id="reviewBpm" min="20" max="350" step="1"><label for="reviewRating">演奏の自信度</label><select id="reviewRating"><option value="5">5 · 非常に自信がある</option><option value="4">4 · おおむね安定</option><option value="3" selected>3 · 不安が残る</option><option value="2">2 · ミスが目立つ</option><option value="1">1 · ほとんどできなかった</option></select><label for="reviewTarget">目標BPM（初回設定後も変更可）</label><input id="reviewTarget" type="number" min="20" max="350" placeholder="任意"><label for="reviewMemo">練習メモ</label><input id="reviewMemo" maxlength="160" placeholder="任意"><button class="full" onclick="saveSession()">記録を保存する</button></div></section>
 <section id="tasks" class="hidden"><div class="card"><h2>書籍名フレーズ</h2><p id="bookTitle" class="book-title"></p><div class="book-cover-placeholder" id="bookCoverPlaceholder" aria-hidden="true">BOOK</div><div class="seg"><button id="bookGuitar" onclick="selectBook('guitar')">🎸 ギター</button><button id="bookDrums" onclick="selectBook('drums')">🥁 ドラム</button></div><p class="note">ギター No.1–105（96–105は練習曲）／ドラム No.1–49</p><div class="row"><button class="secondary" onclick="moveBook(-1)">‹</button><b id="bookRange"></b><button class="secondary" onclick="moveBook(1)">›</button></div><div id="bookGrid" class="phrase-grid"></div><div id="bookDetail"></div></div><div class="card"><h2>練習課題</h2><div id="taskList"></div></div><div class="card"><h2>課題を追加</h2><label>楽器</label><select id="newInstrument"><option value="drums">ドラム</option><option value="guitar">ギター</option></select><label>課題名</label><input id="newName" maxlength="80" placeholder="例：バスドラムのダブル"><label>詳細・書籍名番号（任意）</label><input id="newDetails" maxlength="160" placeholder="例：書籍名 No.12"><label>開始BPM（任意）</label><input id="newBpm" type="number" min="20" max="350"><label>優先度</label><select id="newPriority"><option value="3">高</option><option value="2">中</option><option value="1">低</option></select><button class="full" onclick="addTask()">課題を登録</button></div></section>
-<section id="history" class="hidden"><div class="card"><div class="row"><h2>練習カレンダー</h2><div class="seg"><button id="calMonth" onclick="calendarMode='month';renderCalendar()">月</button><button id="calWeek" onclick="calendarMode='week';renderCalendar()">週</button></div></div><div class="row"><button class="secondary" onclick="shiftCalendar(-1)">‹</button><b id="calTitle"></b><button class="secondary" onclick="shiftCalendar(1)">›</button></div><div id="calGrid" class="calendar-grid"></div><div id="calDetail" class="note"></div></div><div class="stats"><div class="card"><div class="muted">練習回数</div><div class="big" id="totalTime">0分</div></div><div class="card"><div class="muted">実練習日数</div><div class="big" id="actualDays">0日</div></div></div><div class="card"><h2>課題別ベストBPM</h2><div id="bpmRecords"></div></div><div class="card"><h2>練習履歴</h2><div id="historyList"></div></div></section>
+<section id="history" class="hidden"><div id="progressEditor" class="card hidden"><div class="row"><h2>記録を更新</h2><button class="ghost" type="button" onclick="closeProgressEditor()">×</button></div><p id="progressEditorTitle" class="muted"></p><label for="progressBpm">BPM</label><input id="progressBpm" type="number" inputmode="numeric" min="20" max="350"><label for="progressConfidence">自信度</label><select id="progressConfidence"><option value="">未評価</option><option value="1">1 · 難しい</option><option value="2">2 · まだ不安定</option><option value="3">3 · まずまず</option><option value="4">4 · 安定</option><option value="5">5 · 余裕</option></select><button class="full" type="button" onclick="saveProgressEditor()">更新する</button></div><div class="card"><div class="row"><h2>練習カレンダー</h2><div class="seg"><button id="calMonth" onclick="calendarMode='month';renderCalendar()">月</button><button id="calWeek" onclick="calendarMode='week';renderCalendar()">週</button></div></div><div class="row"><button class="secondary" onclick="shiftCalendar(-1)">‹</button><b id="calTitle"></b><button class="secondary" onclick="shiftCalendar(1)">›</button></div><div id="calGrid" class="calendar-grid"></div><div id="calDetail" class="note"></div></div><div class="stats"><div class="card"><div class="muted">練習回数</div><div class="big" id="totalTime">0分</div></div><div class="card"><div class="muted">実練習日数</div><div class="big" id="actualDays">0日</div></div></div><div class="card"><h2>課題別ベストBPM</h2><div id="bpmRecords"></div></div><div class="card"><h2>練習履歴</h2><div id="historyList"></div></div></section>
 <section id="settings" class="hidden"><div class="card"><h2>設定とデータ</h2><p>最低達成時間：<b>3分</b></p><p>日付判定：<b>日本時間（午前0時切替）</b></p><p>フリーズ：<b>初期2回、最大3回</b></p><p class="note">実練習7日ごとにフリーズ1回補充。未達成日は日付更新時に自動消費します。未達成時のアプリ内リマインドに加え、通知許可と通知テストに対応します。アプリを閉じた状態で毎日自動通知するには、別途Push配信サーバーが必要です。</p><h3>アプリの状態</h3><p class="note" id="pwaStatus">アプリの更新状況を確認しています。</p><p class="note" id="appVersion">現在のバージョン：確認中</p><button class="secondary full" type="button" onclick="checkAppUpdate()">最新版を確認</button><p class="note">更新後も練習履歴はこの端末に保持されます。Safari版とホーム画面版で記録が別になる場合があるため、バックアップを推奨します。</p><h3>練習リマインダー</h3><label><input type="checkbox" id="reminderEnabled" style="width:auto;min-width:auto" onchange="setReminderEnabled(this.checked)"> 練習リマインダーを有効にする</label><p class="note" id="notificationStatus">通知の対応状況を確認しています。</p><div class="grid2"><button class="secondary" type="button" onclick="enableNotifications()">通知を許可</button><button class="secondary" type="button" onclick="testNotification()">テスト通知</button></div><p class="note">通知はアプリが開いている間のリマインダーと手動テストに対応します。iPhoneではホーム画面に追加したPWAから通知を許可してください。アプリ終了中の定時Push通知は未対応です。</p><label for="reminderHour">リマインド開始時刻</label><select id="reminderHour" onchange="setReminderHour(this.value)"><option value="18">18:00</option><option value="19">19:00</option><option value="20">20:00</option><option value="21">21:00</option><option value="22">22:00</option><option value="23">23:00</option></select><p class="note" id="pushStatus">定時Pushは配信サーバー設定後に利用できます。</p><div class="grid2"><button class="secondary" onclick="subscribeDailyPush()">定時通知を登録</button><button class="secondary" onclick="unsubscribeDailyPush()">定時通知を解除</button></div><div style="margin-top:8px"><button class="secondary" type="button" onclick="testRemotePush()">Cloudflareからテスト送信</button><button class="secondary" type="button" onclick="previewDailyPush()">今日の通知判定を確認</button></div><p class="note">配信サーバーには通知先・時刻・当日の練習完了状態のみ送ります。課題名や練習メモは送信しません。</p><h3>練習データの保護</h3><p class="note" id="backupStatus">バックアップの状態を確認しています。</p><div class="grid2"><button class="secondary" type="button" onclick="shareBackup()">バックアップを共有</button><button class="secondary" type="button" onclick="exportData()">JSONを保存</button></div><p class="note">iPhoneでは「バックアップを共有」から「ファイルに保存」などを選べます。共有したJSONには練習履歴やメモが含まれるため、保存先にご注意ください。端末内の記録は自動的にクラウド同期されません。</p><label>バックアップを復元</label><input type="file" id="importFile" accept="application/json,.json" onchange="importData(event)"><p class="note">この試作版のデータは現在のブラウザ内に保存されます。端末変更やブラウザデータ消去に備えて定期的にバックアップしてください。</p></div></section></div>
 <nav class="tabs" id="tabs" aria-label="メインメニュー"><button data-tab="today" onclick="show('today')" aria-label="今日" title="今日">⌂</button><button data-tab="tasks" onclick="show('tasks')" aria-label="課題" title="課題">▦</button><button data-tab="metronome" onclick="show('metronome')" aria-label="メトロノーム" title="メトロノーム">♩</button><button data-tab="history" onclick="show('history')" aria-label="記録" title="記録">▥</button><button data-tab="settings" onclick="show('settings')" aria-label="設定" title="設定">⚙</button></nav>
 <div id="pwaUpdateNotice" role="status" aria-live="polite"><span>Riffinityの新しいバージョンがあります。</span><button type="button" onclick="location.reload()">更新する</button></div>
@@ -296,7 +296,39 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function renderTasks(){$('taskList').innerHTML=db.tasks.filter(t=>t.kind!=='book').map(t=>`<div class="item"><div class="row"><b>${esc(t.name)}</b><button class="ghost small" onclick="removeTask('${esc(t.id)}')">削除</button></div><div class="muted">${t.instrument==='drums'?'🥁 ドラム':'🎸 ギター'} · ${esc(t.details||'')} ${t.bpm?'· '+t.bpm+' BPM':''} · 優先度${t.priority}</div></div>`).join('')||'<p class="muted">課題はありません。</p>'}
 function addTask(){const name=$('newName').value.trim();if(!name){alert('課題名を入力してください');return}const bpm=$('newBpm').value?Number($('newBpm').value):null;if(bpm!==null&&(!Number.isInteger(bpm)||bpm<20||bpm>350)){alert('BPMは20〜350の整数で入力してください');return}db.tasks.push({id:crypto.randomUUID(),instrument:$('newInstrument').value,name,details:$('newDetails').value.trim(),bpm,priority:Number($('newPriority').value)});$('newName').value='';$('newDetails').value='';$('newBpm').value='';save();renderTasks()}
 function removeTask(id){if(!confirm('この課題を削除しますか？ 過去の練習履歴は残ります。'))return;db.tasks=db.tasks.filter(t=>t.id!==id);save();renderTasks()}
-function renderHistory(){$('totalTime').textContent=db.sessions.length+'回';$('actualDays').textContent=Object.values(db.days).filter(x=>x==='done').length+'日';$('historyList').innerHTML=db.sessions.slice().reverse().slice(0,60).map(s=>{const t=db.tasks.find(x=>x.id===s.taskId);return '<div class="item"><b>'+esc(t?.name||'削除済み課題')+'</b><div class="muted">'+esc(s.day)+' · '+(s.bpm??'—')+' BPM · 自信 '+(confidence(s)??'—')+'/5</div></div>'}).join('')||'<p class="muted">練習記録はまだありません。</p>'}
+let editingProgress=null;
+function openProgressEditor(id=null,recordDay=null){
+ const taskId=id||db.active?.taskId;if(!taskId)return;
+ const day=recordDay||db.active?.day||todayKey();
+ const record=db.sessions.filter(x=>x.taskId===taskId&&x.day===day).slice(-1)[0];
+ editingProgress={taskId,day};
+ const task=db.tasks.find(x=>x.id===taskId);
+ $('progressEditorTitle').textContent=(task?.name||'課題')+' · '+day;
+ $('progressBpm').value=record?.bpm??(db.active?.taskId===taskId?metro.bpm:'');
+ $('progressConfidence').value=String(record?confidence(record)??'':'');
+ show('history');$('progressEditor').classList.remove('hidden');
+ $('progressEditor').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeProgressEditor(){$('progressEditor').classList.add('hidden');editingProgress=null}
+function saveProgressEditor(){
+ if(!editingProgress)return;
+ const value=$('progressBpm').value,bpm=value===''?null:Number(value);
+ if(bpm!==null&&(!Number.isInteger(bpm)||bpm<20||bpm>350)){toast('BPMは20〜350で入力してください');return}
+ const v=$('progressConfidence').value,c=v===''?null:Number(v);
+ const {taskId,day}=editingProgress,task=db.tasks.find(x=>x.id===taskId);
+ let record=db.sessions.filter(x=>x.taskId===taskId&&x.day===day).slice(-1)[0];
+ if(!record){record={id:crypto.randomUUID(),day,taskId,instrument:task?.instrument||db.selected,startedAt:new Date().toISOString(),seconds:0,memo:''};db.sessions.push(record)}
+ record.bpm=bpm;record.confidence=c;record.rating=c===null?null:c===5?'easy':c>=3?'stable':'hard';record.lastPracticedAt=new Date().toISOString();
+ save();closeProgressEditor();renderHistory();renderBpmRecords();toast('BPM・自信度を更新しました');
+}
+function renderHistory(){
+ $('totalTime').textContent=db.sessions.length+'回';
+ $('actualDays').textContent=Object.values(db.days).filter(x=>x==='done').length+'日';
+ $('historyList').innerHTML=db.sessions.slice().reverse().slice(0,60).map(s=>{
+  const t=db.tasks.find(x=>x.id===s.taskId);
+  return '<div class="item"><b>'+esc(t?.name||'削除済み課題')+'</b><div class="muted">'+esc(s.day)+' · '+(s.bpm??'—')+' BPM · 自信 '+(confidence(s)??'—')+'/5</div><button class="ghost small" type="button" onclick="openProgressEditor(\''+esc(s.taskId)+'\',\''+esc(s.day)+'\')">編集</button></div>';
+ }).join('')||'<p class="muted">練習記録はまだありません。</p>';
+}
 // Replace dropdowns with touch-friendly single-choice button groups.
 function initializeTapChoices(){
  const ids=['metroMeter','metroSub','metroGap','metroRamp','reviewRating','newInstrument','newPriority','reminderHour'];
@@ -384,11 +416,11 @@ function syncMetroTarget(){const task=db.tasks.find(t=>t.id===db.active?.taskId)
 function metroClick(at,accent,subClick){
  const ctx=metro.ctx;if(!ctx)return;
  const osc=ctx.createOscillator(),gain=ctx.createGain();
- osc.type='sine';osc.frequency.setValueAtTime(subClick?650:accent?1300:950,at);
+ osc.type='triangle';osc.frequency.setValueAtTime(subClick?1100:accent?1850:1450,at);
  gain.gain.setValueAtTime(0.0001,at);
- gain.gain.exponentialRampToValueAtTime(subClick?0.08:accent?0.25:0.17,at+0.003);
- gain.gain.exponentialRampToValueAtTime(0.0001,at+0.045);
- osc.connect(gain);gain.connect(metro.master||ctx.destination);osc.start(at);osc.stop(at+0.05);
+ gain.gain.exponentialRampToValueAtTime(subClick?0.28:accent?0.85:0.65,at+0.002);
+ gain.gain.exponentialRampToValueAtTime(0.0001,at+0.07);
+ osc.connect(gain);gain.connect(metro.master||ctx.destination);osc.start(at);osc.stop(at+0.075);
 }
 function scheduleMetro(){
  if(!metro.playing||!metro.ctx)return;
@@ -424,7 +456,7 @@ async function startMetro(){
   }
   const AC=window.AudioContext||window.webkitAudioContext;
   if(!AC)throw Error('このブラウザはWeb Audioに対応していません');
-  if(!metro.ctx||metro.ctx.state==='closed'){metro.ctx=new AC();metro.master=metro.ctx.createGain();metro.master.connect(metro.ctx.destination)}metro.master.gain.value=metro.volume/100;
+  if(!metro.ctx||metro.ctx.state==='closed'){metro.ctx=new AC();metro.master=metro.ctx.createGain();metro.limiter=metro.ctx.createDynamicsCompressor();metro.limiter.threshold.value=-9;metro.limiter.knee.value=3;metro.limiter.ratio.value=12;metro.limiter.attack.value=0.002;metro.limiter.release.value=0.08;metro.master.connect(metro.limiter);metro.limiter.connect(metro.ctx.destination)}metro.master.gain.value=metro.volume/100;
   // The resume call is made directly from the user's tap when possible.
   if(metro.ctx.state!=='running')await metro.ctx.resume();
   if(metro.ctx.state!=='running')throw Error('AudioContextが'+metro.ctx.state+'のままです');
@@ -461,7 +493,7 @@ function toast(message){
  el.textContent=message;el.classList.remove('hidden');
  clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.add('hidden'),4500);
 }
-const APP_VERSION='0.2.3';
+const APP_VERSION='0.2.4';
 let pwaRegistration=null;
 function renderAppVersion(){const el=$('appVersion');if(el)el.textContent='現在のバージョン：v'+APP_VERSION}
 function showPwaUpdate(){const notice=$('pwaUpdateNotice');if(notice)notice.classList.add('visible');const status=$('pwaStatus');if(status)status.textContent='新しいバージョンを取得しました。「更新する」で反映できます。'}
