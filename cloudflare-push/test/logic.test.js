@@ -1,0 +1,11 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {decide,validDay,jstDay,jstHour} from '../src/logic.js';
+const base={enabled:1,completed_day:null,last_sent_day:null,freezes:2,streak:2};
+test('no notification after practice',()=>assert.equal(decide({...base,completed_day:'2026-11-11'},'2026-11-11'),null));
+test('one per day',()=>assert.equal(decide({...base,last_sent_day:'2026-11-11'},'2026-11-11'),null));
+test('disabled',()=>assert.equal(decide({...base,enabled:0},'2026-11-11'),null));
+test('freeze warning',()=>assert.equal(decide({...base,freezes:1},'2026-11-11').kind,'low-freeze'));
+test('critical',()=>assert.equal(decide({...base,freezes:0},'2026-11-11').kind,'critical'));
+test('milestone',()=>assert.equal(decide({...base,streak:6},'2026-11-11').kind,'milestone'));
+test('normal',()=>assert.equal(decide(base,'2026-11-11').kind,'normal'));
+test('date validation',()=>{assert.equal(validDay('2026-02-30'),false);assert.equal(validDay('2026-11-11'),true)});
+test('JST midnight',()=>{const d=new Date('2026-11-10T15:30:00Z');assert.equal(jstDay(d),'2026-11-11');assert.equal(jstHour(d),0)});
