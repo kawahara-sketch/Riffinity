@@ -397,7 +397,7 @@ function updateNotificationStatus(){const el=$('notificationStatus');if(!el)retu
 async function enableNotifications(){if(!('Notification' in window)||!('serviceWorker' in navigator)){toast('この環境では通知を利用できません');return}try{const permission=await Notification.requestPermission();updateNotificationStatus();toast(permission==='granted'?'通知を許可しました':'通知は許可されませんでした')}catch(err){toast('通知設定に失敗しました: '+err.message)}}
 async function notifyRiffinity(title,body){if(!('Notification' in window)||Notification.permission!=='granted')return false;try{const registration=await navigator.serviceWorker.ready;await registration.showNotification(title,{body,icon:'./icon.svg',badge:'./icon.svg',tag:'riffinity-reminder',data:{url:new URL('./',location.href).href}});return true}catch(err){console.warn('Notification:',err);return false}}
 async function testNotification(){if(!('Notification' in window)||Notification.permission!=='granted'){toast('先に通知を許可してください');return}const ok=await notifyRiffinity('Riffinity','テスト通知です。今日も少しずつ練習しましょう。');toast(ok?'テスト通知を送信しました':'通知を表示できませんでした')}
-const PUSH_API_URL=''; // Set to HTTPS backend origin after deployment.
+const PUSH_API_URL='https://riffinity-push.riffinity-lab.workers.dev';
 const PUSH_TOKEN_KEY='riffinity-push-device-token';
 function pushToken(){let t=localStorage.getItem(PUSH_TOKEN_KEY);if(!t){t=crypto.randomUUID()+crypto.randomUUID();localStorage.setItem(PUSH_TOKEN_KEY,t)}return t}
 function pushStatus(msg){const el=$('pushStatus');if(el)el.textContent=msg}
