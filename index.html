@@ -125,6 +125,10 @@ function scheduleMetro(){
   metro.next+=60/(effective*metro.sub);
  }
 }
+function metroAudioStatus(message){
+ const el=$('metroAudioDiagnostic');
+ if(el)el.textContent='音声エンジン: '+message;
+}
 async function startMetro(){
  if(metro.starting||metro.playing)return;
  metro.starting=true;
