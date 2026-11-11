@@ -16,7 +16,7 @@
 .beat-lights span{width:13px;height:13px;border-radius:50%;background:#394660}
 .beat-lights span.lit{background:#a4b8ff;box-shadow:0 0 12px #8ea7ff}
 .beat-lights span.first.lit{background:#ffb870;box-shadow:0 0 12px #ffb870}
-.toast{position:fixed;bottom:83px;left:50%;transform:translateX(-50%);max-width:min(90vw,520px);padding:13px 18px;background:#34456a;border:1px solid #8ea7ff;border-radius:13px;z-index:10;box-shadow:0 6px 25px #0008}
+.tap-options{display:flex;flex-wrap:wrap;gap:7px;margin:7px 0 13px}.tap-options button{flex:1 1 auto;min-height:44px;padding:10px 12px;border-radius:12px;background:#252f42;color:#cbd5e6;border:1px solid #3c4b65;font-size:.84rem;font-weight:650}.tap-options button[aria-pressed="true"]{background:#8ea7ff;color:#101827;border-color:#8ea7ff}.tap-options.compact button{padding:10px 8px}.tap-select-source{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap}.insight-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 0}.insight-summary>div{background:#141d2b;border-radius:13px;padding:13px}.insight-summary strong{display:block;font-size:1.4rem;margin-top:4px}.month-bars{display:grid;grid-template-columns:repeat(30,minmax(0,1fr));align-items:end;gap:3px;height:126px;padding-top:10px}.month-bar{height:100%;display:flex;flex-direction:column;justify-content:flex-end;min-width:0}.month-bar>span{display:block;width:100%;min-height:0}.month-bar .drums{background:#8ea7ff;border-radius:3px 3px 0 0}.month-bar .guitar{background:#78dfb3}.chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:#b9c5d8;margin-top:12px}.chart-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}.toast{position:fixed;bottom:83px;left:50%;transform:translateX(-50%);max-width:min(90vw,520px);padding:13px 18px;background:#34456a;border:1px solid #8ea7ff;border-radius:13px;z-index:10;box-shadow:0 6px 25px #0008}
 </style>
 </head>
 <body><div class="wrap"><header><div><h1>🎸 Riffinity</h1><div class="muted">今日も3分だけ。</div></div><div id="headerStreak">🔥 0日</div></header>
@@ -39,7 +39,7 @@
 </div><div class="timer" id="clock">03:00</div><div id="overtimeHint" class="muted" style="text-align:center" role="status">3分経過後も練習とメトロノームは継続できます。</div><div class="grid2"><button id="pauseBtn" class="secondary" onclick="togglePause()">一時停止</button><button class="ghost" onclick="finishSession(false)">終了する</button></div><p class="note">3分は達成ラインです。経過後もメトロノームと練習時間の計測は続きます。「終了する」を押すと実際の練習時間を記録できます。画面を閉じても経過時間を復元します（停止中は加算しません）。</p></div></section>
 <section id="review" class="hidden"><div class="card"><h2 id="reviewTitle">練習結果</h2><p id="reviewInfo" class="muted"></p><label>BPM（任意）</label><input type="number" id="reviewBpm" min="20" max="350" step="1"><label>自己評価</label><select id="reviewRating"><option value="easy">余裕があった</option><option value="stable" selected>安定して演奏できた</option><option value="hard">難しかった・崩れた</option></select><button class="full" onclick="saveSession()">記録を保存する</button></div></section>
 <section id="tasks" class="hidden"><div class="card"><h2>練習課題</h2><div id="taskList"></div></div><div class="card"><h2>課題を追加</h2><label>楽器</label><select id="newInstrument"><option value="drums">ドラム</option><option value="guitar">ギター</option></select><label>課題名</label><input id="newName" maxlength="80" placeholder="例：バスドラムのダブル"><label>詳細・教則本番号（任意）</label><input id="newDetails" maxlength="160" placeholder="例：教則本 No.12"><label>開始BPM（任意）</label><input id="newBpm" type="number" min="20" max="350"><label>優先度</label><select id="newPriority"><option value="3">高</option><option value="2">中</option><option value="1">低</option></select><button class="full" onclick="addTask()">課題を登録</button></div></section>
-<section id="history" class="hidden"><div class="stats"><div class="card"><div class="muted">累計練習</div><div class="big" id="totalTime">0分</div></div><div class="card"><div class="muted">実練習日数</div><div class="big" id="actualDays">0日</div></div></div><div class="card"><h2>直近7日間の練習時間</h2><div class="bars" id="chart"></div><div class="row" id="chartLabels"></div></div><div class="card"><h2>課題別ベストBPM</h2><div id="bpmRecords"></div></div><div class="card"><h2>練習履歴</h2><div id="historyList"></div></div></section>
+<section id="history" class="hidden"><div class="stats"><div class="card"><div class="muted">累計練習</div><div class="big" id="totalTime">0分</div></div><div class="card"><div class="muted">実練習日数</div><div class="big" id="actualDays">0日</div></div></div><div class="card"><h2>直近7日間の練習時間</h2><div class="bars" id="chart"></div><div class="row" id="chartLabels"></div></div><div class="card"><h2>この30日間の積み重ね</h2><div id="monthSummary" class="insight-summary"></div><div id="monthChart" class="month-bars" role="img" aria-label="直近30日の練習時間。青はドラム、緑はギター"></div><div class="chart-legend"><span><i style="background:#8ea7ff"></i>ドラム</span><span><i style="background:#78dfb3"></i>ギター</span><span>左が30日前、右が今日</span></div></div><div class="card"><h2>課題別ベストBPM</h2><div id="bpmRecords"></div></div><div class="card"><h2>練習履歴</h2><div id="historyList"></div></div></section>
 <section id="settings" class="hidden"><div class="card"><h2>設定とデータ</h2><p>最低達成時間：<b>3分</b></p><p>日付判定：<b>日本時間（午前0時切替）</b></p><p>フリーズ：<b>初期2回、最大3回</b></p><p class="note">実練習7日ごとにフリーズ1回補充。未達成日は日付更新時に自動消費します。未達成時のアプリ内リマインドを追加しました。ブラウザを閉じた状態でのプッシュ通知はサーバー側の配信機構が必要なため、現時点では未対応です。</p><label for="reminderHour">アプリ内リマインド開始時刻</label><select id="reminderHour" onchange="setReminderHour(this.value)"><option value="18">18:00</option><option value="19">19:00</option><option value="20">20:00</option><option value="21">21:00</option><option value="22">22:00</option><option value="23">23:00</option></select><button class="full secondary" onclick="exportData()">JSONバックアップを保存</button><label>バックアップを復元</label><input type="file" id="importFile" accept="application/json,.json" onchange="importData(event)"><p class="note">この試作版のデータは現在のブラウザ内に保存されます。端末変更やブラウザデータ消去に備えて定期的にバックアップしてください。</p></div></section></div>
 <nav class="tabs" id="tabs"><button data-tab="today" onclick="show('today')">🏠<br>今日</button><button data-tab="tasks" onclick="show('tasks')">🎼<br>課題</button><button data-tab="history" onclick="show('history')">📈<br>記録</button><button data-tab="settings" onclick="show('settings')">⚙️<br>設定</button></nav>
 <script>
@@ -71,7 +71,45 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function renderTasks(){$('taskList').innerHTML=db.tasks.map(t=>`<div class="item"><div class="row"><b>${esc(t.name)}</b><button class="ghost small" onclick="removeTask('${esc(t.id)}')">削除</button></div><div class="muted">${t.instrument==='drums'?'🥁 ドラム':'🎸 ギター'} · ${esc(t.details||'')} ${t.bpm?'· '+t.bpm+' BPM':''} · 優先度${t.priority}</div></div>`).join('')||'<p class="muted">課題はありません。</p>'}
 function addTask(){const name=$('newName').value.trim();if(!name){alert('課題名を入力してください');return}const bpm=$('newBpm').value?Number($('newBpm').value):null;if(bpm!==null&&(!Number.isInteger(bpm)||bpm<20||bpm>350)){alert('BPMは20〜350の整数で入力してください');return}db.tasks.push({id:crypto.randomUUID(),instrument:$('newInstrument').value,name,details:$('newDetails').value.trim(),bpm,priority:Number($('newPriority').value)});$('newName').value='';$('newDetails').value='';$('newBpm').value='';save();renderTasks()}
 function removeTask(id){if(!confirm('この課題を削除しますか？ 過去の練習履歴は残ります。'))return;db.tasks=db.tasks.filter(t=>t.id!==id);save();renderTasks()}
-function renderHistory(){const secs=db.sessions.reduce((a,s)=>a+s.seconds,0);$('totalTime').textContent=Math.floor(secs/60)+'分';$('actualDays').textContent=Object.values(db.days).filter(x=>x==='done').length+'日';const days=Array.from({length:7},(_,i)=>addDay(todayKey(),i-6));const mins=days.map(d=>db.sessions.filter(s=>s.day===d).reduce((a,s)=>a+s.seconds,0)/60);const max=Math.max(3,...mins);$('chart').innerHTML=mins.map(v=>`<div class="bar" style="height:${Math.max(2,v/max*100)}%" title="${v.toFixed(1)}分"></div>`).join('');$('chartLabels').innerHTML=days.map(d=>`<span class="barlabel">${d.slice(5)}</span>`).join('');$('historyList').innerHTML=db.sessions.slice().reverse().map(s=>{const t=db.tasks.find(x=>x.id===s.taskId);return `<div class="item"><b>${esc(t?.name||'削除済みの課題')}</b><div class="muted">${esc(s.day)} · ${s.instrument==='drums'?'ドラム':'ギター'} · ${Math.floor(s.seconds/60)}分${s.seconds%60}秒${s.bpm?' · '+s.bpm+' BPM':''} · ${s.rating==='easy'?'余裕':s.rating==='stable'?'安定':'難しい'}</div></div>`}).join('')||'<p class="muted">練習記録はまだありません。</p>'}
+function renderHistory(){renderMonthInsights();const secs=db.sessions.reduce((a,s)=>a+s.seconds,0);$('totalTime').textContent=Math.floor(secs/60)+'分';$('actualDays').textContent=Object.values(db.days).filter(x=>x==='done').length+'日';const days=Array.from({length:7},(_,i)=>addDay(todayKey(),i-6));const mins=days.map(d=>db.sessions.filter(s=>s.day===d).reduce((a,s)=>a+s.seconds,0)/60);const max=Math.max(3,...mins);$('chart').innerHTML=mins.map(v=>`<div class="bar" style="height:${Math.max(2,v/max*100)}%" title="${v.toFixed(1)}分"></div>`).join('');$('chartLabels').innerHTML=days.map(d=>`<span class="barlabel">${d.slice(5)}</span>`).join('');$('historyList').innerHTML=db.sessions.slice().reverse().map(s=>{const t=db.tasks.find(x=>x.id===s.taskId);return `<div class="item"><b>${esc(t?.name||'削除済みの課題')}</b><div class="muted">${esc(s.day)} · ${s.instrument==='drums'?'ドラム':'ギター'} · ${Math.floor(s.seconds/60)}分${s.seconds%60}秒${s.bpm?' · '+s.bpm+' BPM':''} · ${s.rating==='easy'?'余裕':s.rating==='stable'?'安定':'難しい'}</div></div>`}).join('')||'<p class="muted">練習記録はまだありません。</p>'}
+// Replace dropdowns with touch-friendly single-choice button groups.
+function initializeTapChoices(){
+ const ids=['metroMeter','metroSub','metroGap','metroRamp','reviewRating','newInstrument','newPriority','reminderHour'];
+ for(const id of ids){
+  const select=$(id);if(!select||select.dataset.tapReady)return;
+  select.dataset.tapReady='1';select.classList.add('tap-select-source');
+  const group=document.createElement('div');group.className='tap-options'+(id==='metroMeter'||id==='metroSub'?' compact':'');
+  group.setAttribute('role','group');
+  group.setAttribute('aria-label',document.querySelector('label[for="'+id+'"]')?.textContent||id);
+  const sync=()=>group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.value===select.value)));
+  for(const option of select.options){
+   const btn=document.createElement('button');btn.type='button';btn.className='tap-choice';btn.dataset.value=option.value;
+   btn.textContent=option.textContent;btn.setAttribute('aria-pressed','false');
+   btn.addEventListener('click',()=>{select.value=option.value;sync();select.dispatchEvent(new Event('change',{bubbles:true}))});
+   group.appendChild(btn);
+  }
+  select.insertAdjacentElement('afterend',group);
+  select.addEventListener('change',sync);sync();
+ }
+}
+function renderMonthInsights(){
+ const days=Array.from({length:30},(_,i)=>addDay(todayKey(),i-29));
+ const byDay=new Map(days.map(day=>[day,{drums:0,guitar:0}]));
+ for(const record of db.sessions){
+  const day=byDay.get(record.day);
+  if(day&&(record.instrument==='drums'||record.instrument==='guitar'))day[record.instrument]+=Number(record.seconds)||0;
+ }
+ const totals=days.map(d=>byDay.get(d));
+ const total=totals.reduce((sum,x)=>sum+x.drums+x.guitar,0);
+ const active=totals.filter(x=>x.drums+x.guitar>0).length;
+ const best=Math.max(180,...totals.map(x=>x.drums+x.guitar));
+ $('monthSummary').innerHTML='<div><span class="muted">練習した日</span><strong>'+active+' / 30日</strong></div><div><span class="muted">合計練習時間</span><strong>'+Math.floor(total/60)+'分</strong></div>';
+ $('monthChart').innerHTML=totals.map((x,i)=>{
+  const a=x.drums/best*100,b=x.guitar/best*100;
+  const label=days[i]+' ドラム '+Math.round(x.drums/60)+'分、ギター '+Math.round(x.guitar/60)+'分';
+  return '<div class="month-bar" title="'+label+'" aria-label="'+label+'"><span class="drums" style="height:'+a+'%"></span><span class="guitar" style="height:'+b+'%"></span></div>';
+ }).join('');
+}
 function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='riffinity-'+todayKey()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 async function importData(e){const f=e.target.files?.[0];if(!f)return;try{const d=JSON.parse(await f.text());if(d.version!==1||!Array.isArray(d.tasks)||!Array.isArray(d.sessions)||!d.days||typeof d.days!=='object'||!Number.isInteger(d.freezes))throw Error('形式が違います');if(!confirm('現在の記録をバックアップの内容で置き換えますか？'))return;db=d;save();show('today');alert('復元しました')}catch(err){alert('復元できませんでした：'+err.message)}finally{e.target.value=''}}
 
@@ -125,6 +163,7 @@ function scheduleMetro(){
   metro.next+=60/(effective*metro.sub);
  }
 }
+function metroAudioStatus(message){const el=$('metroAudioDiagnostic');if(el)el.textContent='音声エンジン: '+message}
 async function startMetro(){
  if(metro.starting||metro.playing)return;
  metro.starting=true;
@@ -200,5 +239,5 @@ function recommendBpm(task){
  return Math.max(30,Math.min(300,last.bpm+(last.rating==='easy'?5:last.rating==='hard'?-5:0)));
 }
 
-window.addEventListener('visibilitychange',()=>{if(!document.hidden){reconcile();if(!$('session').classList.contains('hidden'))renderClock()}});setInterval(()=>{if(!$('session').classList.contains('hidden'))renderClock()},250);setInterval(checkReminder,60000);reconcile();show(db.active?'session':'today');drawBeat(-1);checkReminder();
+window.addEventListener('visibilitychange',()=>{if(!document.hidden){reconcile();if(!$('session').classList.contains('hidden'))renderClock()}});setInterval(()=>{if(!$('session').classList.contains('hidden'))renderClock()},250);setInterval(checkReminder,60000);reconcile();initializeTapChoices();show(db.active?'session':'today');drawBeat(-1);checkReminder();
 </script></body></html>
