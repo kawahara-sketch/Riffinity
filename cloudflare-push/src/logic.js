@@ -7,4 +7,4 @@ export function decide(device,day){
  if(device.streak>0&&(device.streak+1)%7===0)return {kind:'milestone',title:'Riffinity · あと1日で節目！',body:'今日の3分で連続記録を伸ばしましょう。'};
  return {kind:'normal',title:'Riffinity · 今日の3分',body:'少しだけ楽器に触れてみませんか？'};
 }
-export function validDay(x){if(x===null)return true;if(typeof x!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(x))return false;const d=new Date(x+'T00:00:00Z');return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===x}
+export function validDay(x){if(x===null)return true;if(typeof x!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(x))return false;const d=new Date(x+'T00:00:00Z');return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===x}
