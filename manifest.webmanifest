@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "Riffinity — 毎日の楽器練習",
+  "short_name": "Riffinity",
+  "description": "ギターとドラムの練習習慣を育てるアプリ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d121b",
+  "theme_color": "#0d121b",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
