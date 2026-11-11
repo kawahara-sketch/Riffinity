@@ -9,4 +9,4 @@ crons = ["0 * * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "riffinity-push"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "6734c518-237f-46fa-a10d-2abca0c4983a"
