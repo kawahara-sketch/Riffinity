@@ -5,6 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 VAPID_PUBLIC_KEY = "BCTmYjyBr-mJws6JuYcxdF1fSSvWF6nf_r_eSfm3zY8oFeXsTMDQVtl-F3wgdQBsXRrltKe503UcPmkmoU_80z8"
+VAPID_SUBJECT = "https://kawahara-sketch.github.io/Riffinity/"
 
 [triggers]
 crons = ["0 * * * *"]
