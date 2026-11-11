@@ -16,7 +16,7 @@ export default {
   const path=new URL(req.url).pathname;
   if(req.method==='GET'&&path==='/health')return json({ok:true});
   if(req.method==='GET'&&path==='/config')return json({publicKey:env.VAPID_PUBLIC_KEY});
-  if(req.method!=='POST'||!['/subscribe','/status','/unsubscribe','/test'].includes(path))return fail('Not found',404);
+  if(req.method!=='POST'||!['/subscribe','/status','/unsubscribe','/test','/preview'].includes(path))return fail('Not found',404);
   const tokenHash=await auth(req);if(!tokenHash)return fail('Unauthorized',401);
   let body;try{if(Number(req.headers.get('Content-Length')||0)>16384)return fail('Too large',413);body=await req.json()}catch{return fail('Invalid JSON')}
   if(path==='/subscribe'){
@@ -27,6 +27,13 @@ export default {
   }
   if(!isEndpoint(body.endpoint))return fail('Invalid endpoint');
   const row=await env.DB.prepare('SELECT token_hash FROM devices WHERE endpoint=?').bind(body.endpoint).first();if(!row||row.token_hash!==tokenHash)return fail('Not found',404);
+  if(path==='/preview'){
+   const day=jstDay(new Date());
+   const state=await env.DB.prepare('SELECT enabled,completed_day,freezes,streak,last_sent_day,hour FROM devices WHERE endpoint=? AND token_hash=?').bind(body.endpoint,tokenHash).first();
+   const message=decide(state,day);
+   const reason=!state.enabled?'disabled':state.completed_day===day?'completed':state.last_sent_day===day?'already-sent':'eligible';
+   return json({ok:true,day,hour:state.hour,reason,message});
+  }
   if(path==='/test'){
    if(!env.VAPID_SUBJECT||!env.VAPID_PUBLIC_KEY||!env.VAPID_PRIVATE_KEY)return fail('VAPID configuration incomplete',503);
    try{
