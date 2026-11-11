@@ -278,7 +278,7 @@ async function startMetro(){
   if(metro.ctx.state!=='running')throw Error('AudioContextが'+metro.ctx.state+'のままです');
   metro.playing=true;metro.step=0;metro.bpm=metro.baseBpm;
   metro.started=metro.ctx.currentTime;metro.next=metro.started+0.05;
-  $('metroToggle').textContent='■ クリック停止';$('metroStatus').textContent='再生中';
+  $('metroToggle').textContent='■';$('metroStatus').textContent='再生中';
   metroAudioStatus('再生中 ('+metro.ctx.state+' / '+(navigator.audioSession?.type||'標準')+')');
   scheduleMetro();metro.interval=setInterval(scheduleMetro,25);
  }catch(err){
@@ -289,7 +289,7 @@ async function startMetro(){
 }
 function stopMetro(){
  metro.playing=false;clearInterval(metro.interval);metro.interval=null;
- if($('metroToggle'))$('metroToggle').textContent='▶ クリック開始';
+ if($('metroToggle'))$('metroToggle').textContent='▶';
  if($('metroStatus'))$('metroStatus').textContent='停止中';
  metroAudioStatus('停止中 ('+(metro.ctx?.state||'未起動')+')');
  drawBeat(-1);
