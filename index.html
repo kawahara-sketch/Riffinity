@@ -46,10 +46,10 @@
 'use strict';
 const KEY='practice-streak-v01';
 const initialTasks=[{id:'d1',instrument:'drums',name:'左手ゴーストノート',details:'16分音符の音量コントロール',bpm:80,priority:3},{id:'d2',instrument:'drums',name:'バスドラムのダブル',details:'粒立ちと脱力を意識',bpm:100,priority:3},{id:'d3',instrument:'drums',name:'ブラストビート',details:'安定した持続と脱力',bpm:140,priority:2},{id:'g1',instrument:'guitar',name:'メカニカルトレーニング',details:'所有する教則本から課題番号を指定',bpm:80,priority:3},{id:'g2',instrument:'guitar',name:'オルタネイトピッキング',details:'均一な発音を意識',bpm:90,priority:2}];
+const dayKey=(date=new Date())=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
 const empty=()=>({version:1,tasks:structuredClone(initialTasks),sessions:[],days:{},freezes:2,earnedAt:0,selected:'drums',createdDay:dayKey(),missions:{},active:null});
 let db;try{db=JSON.parse(localStorage.getItem(KEY))||empty();if(!db||!Array.isArray(db.tasks)||!Array.isArray(db.sessions)||typeof db.days!=='object')throw Error('bad data')}catch(e){db=empty();alert('保存データを読み込めなかったため初期状態で開始します。')}
 const $=id=>document.getElementById(id);
-const dayKey=(date=new Date())=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
 const dateFromKey=k=>new Date(k+'T12:00:00+09:00');
 const addDay=(k,n)=>dayKey(new Date(dateFromKey(k).getTime()+n*86400000));
 const todayKey=()=>dayKey();
