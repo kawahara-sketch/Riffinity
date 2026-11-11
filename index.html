@@ -35,7 +35,7 @@
  </div>
  <label><input type="checkbox" id="metroAccent" checked onchange="metroSettingChanged()" style="width:auto"> 小節頭を強調</label>
  <div class="grid2"><button id="metroToggle" onclick="toggleMetro()">▶ クリック開始</button><button class="secondary" onclick="tapTempo()">TAP TEMPO</button></div>
- <p class="note">練習開始時に自動再生。iPhoneでは音声を鳴らすためにタップ操作が必要です。画面をロックすると音が止まる場合があります。</p>
+ <p class="note">練習開始時に自動再生。iPhoneで無音の場合は消音モードを解除し、音量を上げて「クリック開始」をタップしてください。画面ロック中は停止する場合があります。</p><p class="note" id="metroAudioDiagnostic" role="status">音声エンジン: 未起動</p>
 </div><div class="timer" id="clock">03:00</div><div id="overtimeHint" class="muted" style="text-align:center" role="status">3分経過後も練習とメトロノームは継続できます。</div><div class="grid2"><button id="pauseBtn" class="secondary" onclick="togglePause()">一時停止</button><button class="ghost" onclick="finishSession(false)">終了する</button></div><p class="note">3分は達成ラインです。経過後もメトロノームと練習時間の計測は続きます。「終了する」を押すと実際の練習時間を記録できます。画面を閉じても経過時間を復元します（停止中は加算しません）。</p></div></section>
 <section id="review" class="hidden"><div class="card"><h2 id="reviewTitle">練習結果</h2><p id="reviewInfo" class="muted"></p><label>BPM（任意）</label><input type="number" id="reviewBpm" min="20" max="350" step="1"><label>自己評価</label><select id="reviewRating"><option value="easy">余裕があった</option><option value="stable" selected>安定して演奏できた</option><option value="hard">難しかった・崩れた</option></select><button class="full" onclick="saveSession()">記録を保存する</button></div></section>
 <section id="tasks" class="hidden"><div class="card"><h2>練習課題</h2><div id="taskList"></div></div><div class="card"><h2>課題を追加</h2><label>楽器</label><select id="newInstrument"><option value="drums">ドラム</option><option value="guitar">ギター</option></select><label>課題名</label><input id="newName" maxlength="80" placeholder="例：バスドラムのダブル"><label>詳細・教則本番号（任意）</label><input id="newDetails" maxlength="160" placeholder="例：教則本 No.12"><label>開始BPM（任意）</label><input id="newBpm" type="number" min="20" max="350"><label>優先度</label><select id="newPriority"><option value="3">高</option><option value="2">中</option><option value="1">低</option></select><button class="full" onclick="addTask()">課題を登録</button></div></section>
@@ -76,7 +76,7 @@ function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'app
 async function importData(e){const f=e.target.files?.[0];if(!f)return;try{const d=JSON.parse(await f.text());if(d.version!==1||!Array.isArray(d.tasks)||!Array.isArray(d.sessions)||!d.days||typeof d.days!=='object'||!Number.isInteger(d.freezes))throw Error('形式が違います');if(!confirm('現在の記録をバックアップの内容で置き換えますか？'))return;db=d;save();show('today');alert('復元しました')}catch(err){alert('復元できませんでした：'+err.message)}finally{e.target.value=''}}
 
 /* Riffinity practice suite: Web Audio scheduled clicks, all settings are optional. */
-const metro={ctx:null,playing:false,interval:null,next:0,step:0,started:0,baseBpm:80,bpm:80,meter:4,sub:1,gap:0,ramp:0,accent:true,taps:[]};
+const metro={ctx:null,playing:false,interval:null,next:0,step:0,started:0,baseBpm:80,bpm:80,meter:4,sub:1,gap:0,ramp:0,accent:true,taps:[],starting:false};
 function metroSettingChanged(){
  metro.meter=Number($('metroMeter').value);metro.sub=Number($('metroSub').value);
  metro.gap=Number($('metroGap').value);metro.ramp=Number($('metroRamp').value);
@@ -126,21 +126,36 @@ function scheduleMetro(){
  }
 }
 async function startMetro(){
+ if(metro.starting||metro.playing)return;
+ metro.starting=true;
  try{
+  // iOS Safari supports Audio Session API on recent versions. Playback mode
+  // allows metronome audio to use the media playback route, including silent mode.
+  if(navigator.audioSession){
+   try{navigator.audioSession.type='playback'}catch(e){/* older Safari */}
+  }
   const AC=window.AudioContext||window.webkitAudioContext;
   if(!AC)throw Error('このブラウザはWeb Audioに対応していません');
-  if(!metro.ctx)metro.ctx=new AC();
-  await metro.ctx.resume();
+  if(!metro.ctx||metro.ctx.state==='closed')metro.ctx=new AC();
+  // The resume call is made directly from the user's tap when possible.
+  if(metro.ctx.state!=='running')await metro.ctx.resume();
+  if(metro.ctx.state!=='running')throw Error('AudioContextが'+metro.ctx.state+'のままです');
   metro.playing=true;metro.step=0;metro.bpm=metro.baseBpm;
   metro.started=metro.ctx.currentTime;metro.next=metro.started+0.05;
   $('metroToggle').textContent='■ クリック停止';$('metroStatus').textContent='再生中';
+  metroAudioStatus('再生中 ('+metro.ctx.state+' / '+(navigator.audioSession?.type||'標準')+')');
   scheduleMetro();metro.interval=setInterval(scheduleMetro,25);
- }catch(err){alert('メトロノームを開始できませんでした: '+err.message)}
+ }catch(err){
+  metro.playing=false;
+  $('metroStatus').textContent='開始失敗';
+  metroAudioStatus('開始失敗: '+err.message);
+ }finally{metro.starting=false}
 }
 function stopMetro(){
  metro.playing=false;clearInterval(metro.interval);metro.interval=null;
  if($('metroToggle'))$('metroToggle').textContent='▶ クリック開始';
  if($('metroStatus'))$('metroStatus').textContent='停止中';
+ metroAudioStatus('停止中 ('+(metro.ctx?.state||'未起動')+')');
  drawBeat(-1);
 }
 function toggleMetro(){if(metro.playing)stopMetro();else startMetro()}
