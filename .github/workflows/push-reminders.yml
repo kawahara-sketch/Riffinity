@@ -1,0 +1,19 @@
+name: Riffinity hourly practice reminders
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke private push scheduler
+        env:
+          PUSH_SERVER_URL: ${{ secrets.PUSH_SERVER_URL }}
+          PUSH_CRON_SECRET: ${{ secrets.PUSH_CRON_SECRET }}
+        run: |
+          test -n "$PUSH_SERVER_URL" || { echo "PUSH_SERVER_URL secret missing"; exit 1; }
+          test -n "$PUSH_CRON_SECRET" || { echo "PUSH_CRON_SECRET secret missing"; exit 1; }
+          curl --fail-with-body --show-error --silent --max-time 120 --retry 2 \\
+            -X POST -H "x-cron-secret: $PUSH_CRON_SECRET" \\
+            "${PUSH_SERVER_URL%/}/cron"
