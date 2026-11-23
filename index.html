@@ -173,8 +173,8 @@ label{color:#aebed1}
 @media(min-width:700px){.quick-add-overlay{align-items:center}.quick-add-dialog{border-radius:24px}}
 </style>
 </head>
-<body><div class="wrap"><header><div><h1>Riffinity<span style="color:#58adff">.</span></h1></div><div id="headerStreak">🔥 0日</div></header>
-<section id="today"><div class="stats"><div class="card"><div class="muted">継続ストリーク</div><div class="big" id="streak">0日</div></div><div class="card"><div class="muted">フリーズ残数</div><div class="big" id="freezes">❄️ 2</div></div></div><div class="card"><h2>今日のミッション</h2><div class="seg"><button id="drumBtn" onclick="chooseInstrument('drums')">🥁 ドラム</button><button id="guitarBtn" onclick="chooseInstrument('guitar')">🎸 ギター</button></div><div id="mission"></div></div><div class="card"><h2>今日の進捗</h2><div id="dailySummary" class="muted"></div></div></section>
+<body><div class="wrap"><header><div><h1>Riffinity<span style="color:#58adff">.</span></h1></div><div id="headerStreak">🎵 0日</div></header>
+<section id="today"><div class="stats"><div class="card"><div class="muted">総練習日数</div><div class="big" id="streak">0日</div></div><div class="card"><div class="muted">今月の練習日数</div><div class="big" id="freezes">0日</div></div></div><div class="card"><h2>今日のミッション</h2><div class="seg"><button id="drumBtn" onclick="chooseInstrument('drums')">🥁 ドラム</button><button id="guitarBtn" onclick="chooseInstrument('guitar')">🎸 ギター</button></div><div id="mission"></div></div><div class="card"><h2>今日の進捗</h2><div id="dailySummary" class="muted"></div></div></section>
 <section id="metronome" class="hidden"><div class="card"><div id="standaloneMetroMount"></div><button class="secondary full" type="button" onclick="stopMetro();show('today')">メトロノームを閉じる</button></div></section>
 <section id="session" class="hidden"><div class="card"><div class="session-heading"><span id="sessionInstrument" class="chip"></span><span id="sessionName"></span><span id="sessionDetails" class="hidden"></span></div>
 <div id="sessionMetroMount"></div><div class="metro-panel" id="metroPanel">
@@ -244,14 +244,20 @@ const addDay=(k,n)=>dayKey(new Date(dateFromKey(k).getTime()+n*86400000));
 // Practice day changes at 02:00 JST, not midnight.
 const todayKey=()=>dayKey(new Date(Date.now()-2*60*60*1000));
 const save=()=>localStorage.setItem(KEY,JSON.stringify(db));
-function reconcile(){const today=todayKey();const keys=Object.keys(db.days).sort();let cursor=db.createdDay||keys[0]||today; if(!db.createdDay){db.createdDay=cursor;save()}while(cursor<today){if(!db.days[cursor]){if(db.freezes>0){db.days[cursor]='freeze';db.freezes--}else db.days[cursor]='miss'}cursor=addDay(cursor,1)}save();syncDailyPush()}
-function streak(){let k=todayKey(),n=0;if(db.days[k]!=='done'&&db.days[k]!=='freeze')k=addDay(k,-1);while(db.days[k]==='done'||db.days[k]==='freeze'){n++;k=addDay(k,-1)}return n}
+function practiceDays(){return Object.values(db.days).filter(v=>v==='done').length}
+function monthlyPracticeDays(){const month=todayKey().slice(0,7);return Object.entries(db.days).filter(([day,value])=>day.startsWith(month)&&value==='done').length}
+function reconcile(){
+ const today=todayKey();
+ if(!db.createdDay){db.createdDay=today;save()}
+ // Missed days never consume freezes or reset the total practice-day count.
+ save();syncDailyPush();
+}
 function chooseInstrument(v){db.selected=v;save();renderToday()}
 function confidence(s){const n=Number(s.confidence);return s.confidence!=null&&n>=1&&n<=5?n:s.rating==='easy'?5:s.rating==='stable'?4:s.rating==='hard'?2:null}
 function getMission(){const k=todayKey(),inst=db.selected;db.missions[k]??={};let t=db.tasks.find(x=>x.id===db.missions[k][inst]&&x.instrument===inst);if(t)return t;const all=db.tasks.filter(x=>x.instrument===inst),book=all.filter(x=>x.kind==='book'),done=new Set(db.sessions.filter(x=>x.instrument===inst).map(x=>x.taskId));const highest=Math.max(0,...book.filter(x=>done.has(x.id)&&(inst!=='guitar'||x.number<=95)).map(x=>x.number));const limit=inst==='guitar'?95:49;const near=book.filter(x=>x.number>=Math.max(1,highest-3)&&x.number<=Math.min(limit,highest+2));const review=book.filter(x=>done.has(x.id));const weak=review.filter(x=>{const last=db.sessions.filter(s=>s.taskId===x.id).slice(-1)[0];return last&&confidence(last)<=3});const r=Math.random();let pool=inst==='guitar'&&r<.1?book.filter(x=>x.number>=96):r<.4?near.filter(x=>!done.has(x.id)):r<.7?review:r<.9?weak:all.filter(x=>x.kind!=='book');if(!pool.length)pool=near.length?near:all;const recent=new Set(db.sessions.filter(x=>x.instrument===inst).slice(-2).map(x=>x.taskId));const fresh=pool.filter(x=>!recent.has(x.id));if(fresh.length)pool=fresh;t=pool[Math.floor(Math.random()*pool.length)];if(t){db.missions[k][inst]=t.id;save()}return t||null}
 function rerollMission(){delete db.missions[todayKey()]?.[db.selected];save();renderToday()}
 function choosePhrase(id){const t=db.tasks.find(x=>x.id===id);if(!t)return;db.selected=t.instrument;db.missions[todayKey()]??={};db.missions[todayKey()][t.instrument]=id;save();startSession()}
-function renderToday(){reconcile();$('streak').textContent=streak()+'日';$('headerStreak').textContent='🔥 '+streak()+'日';$('freezes').textContent='❄️ '+db.freezes;['drums','guitar'].forEach(x=>$(x==='drums'?'drumBtn':'guitarBtn').classList.toggle('active',db.selected===x));const t=getMission();$('mission').innerHTML=t?`<span class="chip">${db.selected==='drums'?'🥁 ドラム':'🎸 ギター'}</span><h2 style="margin-top:15px">${esc(t.name)}</h2><p class="muted">${esc(t.details||'自由に練習')} · ${t.bpm?esc(t.bpm)+' BPM · ':''}3分</p><div class="grid2"><button class="full" onclick="startSession()">▶ 練習開始</button><button class="full secondary" onclick="rerollMission()">↻ 別の課題</button></div>`:'<p class="muted">この楽器の課題がありません。課題画面で登録してください。</p>';const s=db.sessions.filter(s=>s.day===todayKey());$('dailySummary').innerHTML=(db.days[todayKey()]==='done'?'<p class="success">✓ 今日のストリーク達成！</p>':'<p>まだ未達成です。</p>')+`<p>本日の練習：${Math.floor(s.reduce((a,x)=>a+x.seconds,0)/60)}分（${s.length}セッション）</p>`}
+function renderToday(){reconcile();$('streak').textContent=practiceDays()+'日';$('headerStreak').textContent='🎵 '+practiceDays()+'日';$('freezes').textContent=monthlyPracticeDays()+'日';['drums','guitar'].forEach(x=>$(x==='drums'?'drumBtn':'guitarBtn').classList.toggle('active',db.selected===x));const t=getMission();$('mission').innerHTML=t?`<span class="chip">${db.selected==='drums'?'🥁 ドラム':'🎸 ギター'}</span><h2 style="margin-top:15px">${esc(t.name)}</h2><p class="muted">${esc(t.details||'自由に練習')} · ${t.bpm?esc(t.bpm)+' BPM · ':''}3分</p><div class="grid2"><button class="full" onclick="startSession()">▶ 練習開始</button><button class="full secondary" onclick="rerollMission()">↻ 別の課題</button></div>`:'<p class="muted">この楽器の課題がありません。課題画面で登録してください。</p>';const s=db.sessions.filter(s=>s.day===todayKey());$('dailySummary').innerHTML=(db.days[todayKey()]==='done'?'<p class="success">✓ 今日のストリーク達成！</p>':'<p>まだ未達成です。</p>')+`<p>本日の練習：${Math.floor(s.reduce((a,x)=>a+x.seconds,0)/60)}分（${s.length}セッション）</p>`}
 let tick=null,pending=null;
 function activeSeconds(){if(!db.active)return 0;return db.active.accumulated+(db.active.running?Math.max(0,Math.floor((Date.now()-db.active.resumedAt)/1000)):0)}
 function startSession(){if(db.active){show('session');return}const t=getMission();if(!t)return;setMetroBpm(recommendBpm(t));db.active={taskId:t.id,instrument:t.instrument,day:todayKey(),accumulated:0,running:true,resumedAt:Date.now(),startedAt:new Date().toISOString()};save();show('session');startMetro()}
@@ -280,8 +286,7 @@ function finishSession(force){
  if(sec>=180||existing?.seconds>=180){
   db.days[active.day]='done';
   const actual=Object.values(db.days).filter(v=>v==='done').length;
-  const rewards=Math.floor(actual/7);
-  if(rewards>db.earnedAt){db.freezes=Math.min(3,db.freezes+(rewards-db.earnedAt));db.earnedAt=rewards}
+  // Count completed days without awarding streak-protection items.
  }
  db.active=null;pending=null;save();syncDailyPush();show('today');
  toast(sec>=180?'✓ 練習を保存しました · 3分達成':'✓ 練習を保存しました');
@@ -516,7 +521,7 @@ function toast(message){
  el.textContent=message;el.classList.remove('hidden');
  clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.add('hidden'),4500);
 }
-const APP_VERSION='0.2.6';
+const APP_VERSION='0.2.7';
 let pwaRegistration=null;
 function renderAppVersion(){const el=$('appVersion');if(el)el.textContent='現在のバージョン：v'+APP_VERSION}
 function showPwaUpdate(){const notice=$('pwaUpdateNotice');if(notice)notice.classList.add('visible');const status=$('pwaStatus');if(status)status.textContent='新しいバージョンを取得しました。「更新する」で反映できます。'}
@@ -531,11 +536,11 @@ function pushToken(){let t=localStorage.getItem(PUSH_TOKEN_KEY);if(!t){t=crypto.
 function pushStatus(msg){const el=$('pushStatus');if(el)el.textContent=msg}
 function b64bytes(str){const raw=atob(str.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(str.length/4)*4,'='));return Uint8Array.from(raw,c=>c.charCodeAt(0))}
 async function pushPost(path,data){const r=await fetch(PUSH_API_URL+path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+pushToken()},body:JSON.stringify(data)});if(!r.ok)throw Error('HTTP '+r.status);return r.json()}
-async function subscribeDailyPush(){if(!PUSH_API_URL){pushStatus('配信サーバーの設定待ちです');return}try{if(!('PushManager' in window)||!('serviceWorker' in navigator))throw Error('Push非対応の環境です');if(Notification.permission!=='granted')throw Error('先に通知を許可してください');const configResponse=await fetch(PUSH_API_URL+'/config',{cache:'no-store'});if(!configResponse.ok)throw Error('公開鍵取得に失敗しました (HTTP '+configResponse.status+')');const c=await configResponse.json();if(typeof c?.publicKey!=='string'||!c.publicKey.trim())throw Error('配信サーバーから公開鍵が返されませんでした。アプリを再起動してください');const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64bytes(c.publicKey)});await pushPost('/subscribe',{subscription:sub,hour:0,enabled:db.reminderEnabled!==false,completedDay:db.days[todayKey()]==='done'?todayKey():null,freezes:db.freezes,streak:streak()});pushStatus('定時通知を登録しました')}catch(e){pushStatus('登録失敗：'+e.message)}}
+async function subscribeDailyPush(){if(!PUSH_API_URL){pushStatus('配信サーバーの設定待ちです');return}try{if(!('PushManager' in window)||!('serviceWorker' in navigator))throw Error('Push非対応の環境です');if(Notification.permission!=='granted')throw Error('先に通知を許可してください');const configResponse=await fetch(PUSH_API_URL+'/config',{cache:'no-store'});if(!configResponse.ok)throw Error('公開鍵取得に失敗しました (HTTP '+configResponse.status+')');const c=await configResponse.json();if(typeof c?.publicKey!=='string'||!c.publicKey.trim())throw Error('配信サーバーから公開鍵が返されませんでした。アプリを再起動してください');const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64bytes(c.publicKey)});await pushPost('/subscribe',{subscription:sub,hour:0,enabled:db.reminderEnabled!==false,completedDay:db.days[todayKey()]==='done'?todayKey():null,freezes:db.freezes,streak:practiceDays()});pushStatus('定時通知を登録しました')}catch(e){pushStatus('登録失敗：'+e.message)}}
 async function previewDailyPush(){try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)throw Error('先に定時通知を登録してください');await syncDailyPush();const r=await pushPost('/preview',{endpoint:sub.endpoint});const reasons={disabled:'リマインダー無効',completed:'今日の練習は完了済み', 'already-sent':'今日は送信済み',eligible:'送信対象'};pushStatus('通知判定：'+(reasons[r.reason]||r.reason)+(r.message?' · '+r.message.title:' · 送信なし')+'（通知 0:00・1:00／締切 2:00）')}catch(e){pushStatus('通知判定失敗：'+e.message)}}
 async function testRemotePush(){try{if(!PUSH_API_URL)throw Error('配信サーバー未設定');const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)throw Error('先に「定時通知を登録」を押してください');pushStatus('Cloudflareから送信中…');await pushPost('/test',{endpoint:sub.endpoint});pushStatus('Cloudflareがテスト通知を送信しました。iPhoneの通知を確認してください')}catch(e){pushStatus('テスト送信失敗：'+e.message)}}
 async function unsubscribeDailyPush(){try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(sub&&PUSH_API_URL)await pushPost('/unsubscribe',{endpoint:sub.endpoint});if(sub)await sub.unsubscribe();pushStatus('定時通知を解除しました')}catch(e){pushStatus('解除失敗：'+e.message)}}
-async function syncDailyPush(){if(!PUSH_API_URL||!('serviceWorker' in navigator))return;try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(sub)await pushPost('/status',{endpoint:sub.endpoint,hour:0,enabled:db.reminderEnabled!==false,completedDay:db.days[todayKey()]==='done'?todayKey():null,freezes:db.freezes,streak:streak()})}catch(e){console.warn('Push sync',e)}}
+async function syncDailyPush(){if(!PUSH_API_URL||!('serviceWorker' in navigator))return;try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(sub)await pushPost('/status',{endpoint:sub.endpoint,hour:0,enabled:db.reminderEnabled!==false,completedDay:db.days[todayKey()]==='done'?todayKey():null,freezes:db.freezes,streak:practiceDays()})}catch(e){console.warn('Push sync',e)}}
 function setReminderEnabled(v){db.reminderEnabled=v;save();syncDailyPush()}
 // Reminder schedule is fixed to 00:00 and 01:00 JST.
 function checkReminder(){
