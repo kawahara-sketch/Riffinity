@@ -30,9 +30,10 @@ export default {
   if(path==='/preview'){
    const day=jstDay(new Date());
    const state=await env.DB.prepare('SELECT enabled,completed_day,freezes,streak,last_sent_day,hour FROM devices WHERE endpoint=? AND token_hash=?').bind(body.endpoint,tokenHash).first();
-   const message=decide(state,day);
-   const reason=!state.enabled?'disabled':state.completed_day===day?'completed':state.last_sent_day===day?'already-sent':'eligible';
-   return json({ok:true,day,hour:state.hour,reason,message});
+   const hour=jstHour(new Date());
+   const message=decide(state,day,hour===0||hour===1?hour:null);
+   const reason=!state.enabled?'disabled':state.completed_day===day?'completed':state.last_sent_day===day+':'+hour?'already-sent':'eligible';
+   return json({ok:true,day,hour:state.hour,reason,message,schedule:[0,1],cutoffHour:2});
   }
   if(path==='/test'){
    if(!env.VAPID_SUBJECT||!env.VAPID_PUBLIC_KEY||!env.VAPID_PRIVATE_KEY)return fail('VAPID configuration incomplete',503);
@@ -55,17 +56,19 @@ export default {
 };
 async function sendDue(env,now){
  const day=jstDay(now),hour=jstHour(now);
+ if(hour!==0&&hour!==1)return;
+ const slot=day+':'+hour;
  webpush.setVapidDetails(env.VAPID_SUBJECT,env.VAPID_PUBLIC_KEY,env.VAPID_PRIVATE_KEY);
  let cursor='';
  while(true){
-  const {results}=await env.DB.prepare('SELECT * FROM devices WHERE enabled=1 AND hour=? AND endpoint>? ORDER BY endpoint LIMIT 50').bind(hour,cursor).all();
+  const {results}=await env.DB.prepare('SELECT * FROM devices WHERE enabled=1 AND endpoint>? ORDER BY endpoint LIMIT 50').bind(cursor).all();
   if(!results.length)break;
   for(const row of results){
-   cursor=row.endpoint;const message=decide(row,day);if(!message)continue;
-   // Claim the day before sending to prevent duplicates across overlapping cron runs.
-   const claim=await env.DB.prepare('UPDATE devices SET last_sent_day=? WHERE endpoint=? AND (last_sent_day IS NULL OR last_sent_day<>?) AND enabled=1 AND (completed_day IS NULL OR completed_day<>?)').bind(day,row.endpoint,day,day).run();
+   cursor=row.endpoint;const message=decide(row,day,hour);if(!message)continue;
+   // Claim this reminder slot to prevent duplicates, while allowing both 00:00 and 01:00.
+   const claim=await env.DB.prepare('UPDATE devices SET last_sent_day=? WHERE endpoint=? AND (last_sent_day IS NULL OR last_sent_day<>?) AND enabled=1 AND (completed_day IS NULL OR completed_day<>?)').bind(slot,row.endpoint,slot,day).run();
    if(!claim.meta?.changes)continue;
-   try{await webpush.sendNotification(JSON.parse(row.subscription),JSON.stringify({title:message.title,body:message.body,tag:'riffinity-daily',kind:message.kind}),{TTL:3600})}
+   try{await webpush.sendNotification(JSON.parse(row.subscription),JSON.stringify({title:message.title,body:message.body,tag:'riffinity-daily-'+hour,kind:message.kind}),{TTL:3600})}
    catch(e){if(e.statusCode===404||e.statusCode===410)await env.DB.prepare('DELETE FROM devices WHERE endpoint=?').bind(row.endpoint).run();else console.error('Push failed',e.statusCode||e.message)}
   }
   if(results.length<50)break;
